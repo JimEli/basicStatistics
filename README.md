@@ -5,7 +5,12 @@ Functions sourced from various locations around the web.
 
 Basic statistical functions performed on a vector of data:
 <ol>
-  <li>mean, median, mode, variance, standard deviation, z-score</li>
+  <li>mean</li>
+  <li>median</li>
+  <li>mode</li>
+  <li>variance</li>
+  <li>standard deviation</li>
+  <li>z-score</li>
 </ol>
 
 
