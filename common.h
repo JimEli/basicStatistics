@@ -16,19 +16,24 @@ extern double qNorm(const double, const double, const double);
 
 //#define ML_POSINF  std::numeric_limits<double>::infinity()
 #define ML_POSINF  DBL_MAX
+
 //#define ML_NEGINF  (-1 * std::numeric_limits<float>::infinity())
 #define ML_NEGINF  (-1.0 * DBL_MAX)
+
 #ifndef M_1_SQRT_2PI
-#define M_1_SQRT_2PI   0.398942280401432677939946059934 // 1/sqrt(2pi) 
+#define M_1_SQRT_2PI   0.398942280401432677939946059934
 #endif
+
 #ifndef M_2PI
-#define M_2PI		6.283185307179586476925286766559	/* 2*pi */
+#define M_2PI		6.283185307179586476925286766559
 #endif
+
 #ifndef M_LN_SQRT_2PI
-#define M_LN_SQRT_2PI  0.918938533204672741780329736406 // log(sqrt(2*pi)) == log(2*pi)/2 
+#define M_LN_SQRT_2PI  0.918938533204672741780329736406
 #endif
+
 #ifndef M_LOG10_2
-#define M_LOG10_2	0.301029995663981195213738894724	/* log10(2) */
+#define M_LOG10_2	0.301029995663981195213738894724
 #endif
 
 // Utilities for use with the central limit theorem and normal distributions.
@@ -109,7 +114,6 @@ double stirlerr(double n)
 		nn = n + n;
 		if (nn == (int)nn)
 			return(sferr_halves[(int)nn]);
-		//return(lgammafn(n + 1.) - (n + 0.5) * log(n) + n - M_LN_SQRT_2PI);
 		return(lgamma(n + 1.) - (n + 0.5) * log(n) + n - M_LN_SQRT_2PI);
 	}
 
@@ -128,15 +132,13 @@ double stirlerr(double n)
 	return((S0 - (S1 - (S2 - (S3 - S4 / nn) / nn) / nn) / nn) / n);
 }
 
-#define M_SQRT_2PI  2.50662827463100050241576528481104525301  // sqrt(2*pi) 
-// sqrt(2 * Rmpfr::Const("pi", 128))
-#define x_LRG  2.86111748575702815380240589208115399625e+307  // = 2^1023 / pi
-// Scalefactor:= (2^32)^8 = 2^256 = 1.157921e+77 
+#define M_SQRT_2PI  2.50662827463100050241576528481104525301
+#define x_LRG  2.86111748575702815380240589208115399625e+307
 #define SQR(x) ((x)*(x))
 static const double scalefactor = SQR(SQR(SQR(4294967296.0)));
 #undef SQR
 
-static double logcf(double x, double i, double d, double eps /* ~ relative tolerance */)
+static double logcf(double x, double i, double d, double eps)
 {
     double c1 = 2 * d;
     double c2 = i + d;
@@ -381,7 +383,6 @@ void ebd0(double x, double M, double* yh, double* yl)
     int e;
     double r = frexp(M / x, &e);
 
-    // prevent later overflow
     if (M_LN2 * ((double)-e) > 1. + DBL_MAX / x)
     {
         *yh = ML_POSINF;
@@ -389,9 +390,8 @@ void ebd0(double x, double M, double* yh, double* yl)
     }
 
     int i = (int)floor((r - 0.5) * (2 * N) + 0.5);
-    // now,  0 <= i <= N
     double f = floor(S / (0.5 + i / (2.0 * N)) + 0.5);
-    double fg = ldexp(f, -(e + Sb)); // ldexp(f, E) := f * 2^E
+    double fg = ldexp(f, -(e + Sb)); 
 
     if (fg == ML_POSINF)
     {
@@ -402,11 +402,10 @@ void ebd0(double x, double M, double* yh, double* yl)
     ADD1(-x * log1pmx((M * fg - x) / x));
     if (fg == 1)
         return;
-    // else (fg != 1) :
     for (int j = 0; j < 4; j++)
     {
-        ADD1(x * bd0_scale[i][j]);  // handles  x*log(fg*2^e) 
-        ADD1(-x * e * bd0_scale[0][j]);  // handles  x*log(1/ 2^e) 
+        ADD1(x * bd0_scale[i][j]); 
+        ADD1(-x * e * bd0_scale[0][j]);  
         if (!isfinite(*yh))
         {
             *yh = ML_POSINF;
@@ -427,7 +426,7 @@ double dpois_raw(double x, double lambda)
         return ((x == 0) ? 1. : 0.);
 
     if (!isfinite(lambda))
-        return 0.; // including for the case where  x = lambda = +Inf
+        return 0.; 
 
     if (x < 0.)
         return 0.;
@@ -437,10 +436,10 @@ double dpois_raw(double x, double lambda)
 
     if (lambda < x * DBL_MIN)
     {
-        if (!isfinite(x)) // lambda < x = +Inf
+        if (!isfinite(x)) 
             return 0.;
-        // else
-        return(exp(-lambda + x * log(lambda) - lgamma(x + 1)));
+
+	 return(exp(-lambda + x * log(lambda) - lgamma(x + 1)));
     }
 
     double yh, yl;
@@ -448,8 +447,8 @@ double dpois_raw(double x, double lambda)
     ebd0(x, lambda, &yh, &yl);
     yl += stirlerr(x);
 
-    bool Lrg_x = (x >= x_LRG); //really large x  <==>  2*pi*x  overflows
-    double r = Lrg_x ? M_SQRT_2PI * sqrt(x) : M_2PI * x; // sqrt(.): avoid overflow for very large x
+    bool Lrg_x = (x >= x_LRG); 
+    double r = Lrg_x ? M_SQRT_2PI * sqrt(x) : M_2PI * x; 
 
     return exp(-yl) * exp(-yh) / (Lrg_x ? r : sqrt(r));
 }
@@ -463,7 +462,6 @@ double lgamma1p(double a)
 
     const double eulers_const = 0.5772156649015328606065120900824024;
 
-    // coeffs[i] holds (zeta(i+2)-1)/(i+2) , i = 0:(N-1), N = 40:
     const int N = 40;
     static const double coeffs[40] = {
       0.3224670334241132182362075833230126e-0,  // = (zeta(2)-1)/2 
@@ -600,16 +598,14 @@ static double pd_lower_cf(double y, double d)
 
     while NEEDED_SCALE
 
-        i = 0; of = -1.; // far away 
+        i = 0; of = -1.; 
     while (i < max_it)
     {
         i++;  c2--;  c3 = i * c2;  c4 += 2;
-        // c2 = y - i,  c3 = i(y - i),  c4 = d + 2i,  for i odd 
         a1 = c4 * a2 + c3 * a1;
         b1 = c4 * b2 + c3 * b1;
 
         i++;  c2--;  c3 = i * c2;  c4 += 2;
-        // c2 = y - i,  c3 = i(y - i),  c4 = d + 2i,  for i even 
         a2 = c4 * a1 + c3 * a2;
         b2 = c4 * b1 + c3 * b2;
 
@@ -624,7 +620,7 @@ static double pd_lower_cf(double y, double d)
             }
     }
 
-    return f; // should not happen... 
+    return f;
 }
 
 #undef NEEDED_SCALE
@@ -656,7 +652,7 @@ static double ppois_asymp(double x, double lambda, bool lower_tail)
 {
     static const double coefs_a[8] = 
     {
-      -1e99, // placeholder used for 1-indexing 
+      -1e99, // placeholder used for 1-indexing.
       2 / 3.,
       -4 / 135.,
       8 / 2835.,
@@ -819,11 +815,11 @@ double pgamma(double x, double alph, double scale, int lower_tail)
     x /= scale;
 
 #ifdef IEEE_754
-    if (isnan(x)) // eg. original x = scale = +Inf
+    if (isnan(x)) 
         return x;
 #endif
 
-    if (alph == 0.) // limit case.
+    if (alph == 0.)
         return (x <= 0) ? 0. : 1.;
 
     return pgamma_raw(x, alph, lower_tail);
