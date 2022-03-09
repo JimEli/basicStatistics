@@ -1,9 +1,6 @@
-﻿#define _USE_MATH_DEFINES 
-#include <cmath>
+#define _USE_MATH_DEFINES 
 #include <iostream>
 #include <vector>
-#include <algorithm>
-#include <numeric>
 
 #include "common.h"
 #include "normal.h"
@@ -83,15 +80,15 @@ T variance(const std::vector<T>& v)
 
     unsigned sz = v.size();
     const T mean = std::accumulate(v.begin(), v.end(), 0.0) / sz;
-    auto variance_func = [&mean, &sz](T accumulator, const T& val) { return accumulator + ((val - mean)*(val - mean)/(sz - 1)); };
+    auto variance_func = [&mean, &sz](T accumulator, const T& val) { return accumulator + ((val - mean) * (val - mean) / (sz - 1)); };
 
     return std::accumulate(v.begin(), v.end(), 0.0, variance_func);
 }
 
 // Measure of dispersement (tells how much data is spread out).
 template<typename T>
-T stdDeviation(std::vector<T> v) 
-{ 
+T stdDeviation(std::vector<T> v)
+{
     if (v.empty())
         return { };
 
@@ -102,10 +99,10 @@ T stdDeviation(std::vector<T> v)
 template<typename T>
 T zScore(const T x, const std::vector<T> v)
 {
-  if (v.empty())
-    return { };
+    if (v.empty())
+        return { };
 
-  return ((x - mean(v)) / stdDeviation(v));
+    return ((x - mean(v)) / stdDeviation(v));
 }
 
 
@@ -116,14 +113,14 @@ int main()
 {
     const std::vector<double> sample = { 3.0, 1.0, 5.0, 6.0, 3.0, 4.5 };
 
-    print("mean:", mean(sample));
-    print("median:", median(sample));
-    print("mode:", mode(sample));
-    print("variance:", variance(sample));
-    print("standard deviation:", stdDeviation(sample));
+    std::cout << "mean: " << mean(sample);
+    std::cout << ", median: " << median(sample);
+    std::cout << ", mode:" << mode(sample) << std::endl;
+    std::cout << "variance: " << variance(sample);
+    std::cout << ", standard deviation: " << stdDeviation(sample) << std::endl;
     std::cout << "z-score:" << std::endl; std::for_each(sample.begin(), sample.end(), [sample](double x) { std::cout << "  " << x << ": " << zScore(x, sample) << std::endl; });
 
-    
+
     // R Binomial Probabilities: P(X=k) = dbinom(#success, #trials, prob. success) and P(X<=k) = pbinom(#success, #trials, #prob. success)
     std::cout << "Binomial Distribution Probabilities\n";
     // A basketball player makes 44% of his/her 3-point shots. In a game he attempts 
@@ -144,7 +141,7 @@ int main()
     // deviation of 46. What cholesterol level separates the lowest 22%? = 165.488
     print("Normal distribution x:", qNorm(0.22, 201, 46));
 
-    
+
     // Central Limit Theorem (means), n>=30 results in averages making approx. normal distribution with mu=mu, sigma=sigma/sqrt(n)
     // Normal Distribution Probabilities (percent, proportion): pnorm(z) x->z->area, qnorm(left area) area->z->x
     std::cout << "Central Limit Theorem (means)\n";
@@ -155,14 +152,13 @@ int main()
     // there is 94% probability that mean commute is between what 2 distances? = 14.262 and 17.738
     std::cout << " 94% probability commute is between: " << qNorm((1. - 0.94) / 2, 16, qSigmaCLT(75, 8)); print(" to:", qNorm(1. - (1. - 0.94) / 2, 16, qSigmaCLT(75, 8)));
 
-    
+
     // Central Limit Theorem (proportions), n*p>=5 and n*(1-p)>=5 can use normal distribution with mu=p, sigma=sqrt((p*(1-p))/n)
     // Normal Distribution Probabilities (percent, proportion): pnorm(z) x->z->area, qnorm(left area) area->z->x
     std::cout << "Central Limit Theorem (proportions)\n";
     // 63% of adults drink coffee daily. Random sample of 250 adults is selected. 
     // Find probability that more than 67% of sampled drink coffee daily. = 0.095
     print("Probability 67% of 250 drink coffee:", 1. - pNorm(0.67, 0.63, pSigmaCLT(250, 0.63)));
-
     // 68% of graduates have loan debt. From random sample of 85 grads, 
     // find probability that between 65 and 80% are in debt. = 0.713
     print("Probability 65-80% in debt:", pNorm(0.80, 0.68, pSigmaCLT(85, 0.68)) - pNorm(0.65, 0.68, pSigmaCLT(85, 0.68)));
@@ -186,23 +182,14 @@ int main()
     // What is probability of seeing exactly 3 blemishes on randomly selected piece of 
     // sheet metal, when on average one expects 1.2 blemishes, can be found with? =0.087
     print("3 blemishes on metal:", dPois(3, 1.2));
-    // 170 oil tankers arrived randomly and independently at port over last 104 days. 
-    // Only 2 tankers may be unloaded per day, extra oil tankers wait.
-    // What is the probability that no tankers will arrive on Tuesday? =0.195
-    // What is the probability that more than two will arrive on Friday, 
-    // so that some will wait for Saturday to be unloaded? =0.225
-    // Assuming no tankers are left over from Tuesday, what is the probability that exactly one 
-    // tanker will be left over from Wednesday and none will be left over from Thursday? =0.142
-    print("No tankers on Tuesday:", pPois(0, 170. / 104));
-    print("2 tankers on Friday:", 1. - pPois(2, 170. / 104));
-    print("3 tankers on Wednesday:", dPois(3, 170. / 104));
 
 
-    std::cout << "dchisq=" << dchisq(5, 10) << std::endl;
-    std::cout << "pchisq=" << pchisq(5, 10) << std::endl;
-    std::cout << "qchisq=" << qchisq(.1, 200) << std::endl;
+    std::cout << "dchisq=" << dchisq(5, 10);
+    std::cout << ", pchisq=" << pchisq(5, 10);
+    std::cout << ", qchisq=" << qchisq(.1, 200) << std::endl;
 
-    std::cout << "qt=" << qt(.1, 5) << std::endl;
-    std::cout << "dt=" << dt(.1, 5) << std::endl;
-    std::cout << "pt=" << pt(.5, 100) << std::endl;
+
+    std::cout << "qt=" << qt(.1, 5);
+    std::cout << ", dt=" << dt(.1, 5);
+    std::cout << ", pt=" << pt(.5, 100) << std::endl;
 }
