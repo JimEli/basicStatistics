@@ -61,9 +61,6 @@ double fmin2(double x, double y)
 }
 
 // Computes the log of the error term in Stirling's formula.
-//   For n > 15, uses the series 1/12n - 1/360n^3 + ...
-//   For n <=15, integers or half-integers, uses stored values.
-//   For other n < 15, uses lgamma directly (don't use this to write lgamma!)
 double stirlerr(double n)
 {
 #define S0 0.083333333333333333333       /* 1/12 */
@@ -139,9 +136,6 @@ double stirlerr(double n)
 static const double scalefactor = SQR(SQR(SQR(4294967296.0)));
 #undef SQR
 
-// Continued fraction for calculation of
-//   1/i + x/(i+d) + x^2/(i+2*d) + x^3/(i+3*d) + ... = sum_{k=0}^Inf x^k/(i+k*d)
-// auxiliary in log1pmx() and lgamma1p()
 static double logcf(double x, double i, double d, double eps /* ~ relative tolerance */)
 {
     double c1 = 2 * d;
@@ -214,14 +208,6 @@ double log1pmx(double x) {
     }
 }
 
-// ebd0(): R Bugzilla PR#15628 -- proposed accuracy improvement by Morten Welinder
-// A table of logs for scaling purposes.  Each value has four parts with
-// 23 bits in each.  That means each part can be multiplied by a double
-// with at most 30 bits set and not have any rounding error.  Note, that
-// the first entry is log(2).
-// Entry i is associated with the value r = 0.5 + i / 256.0.  The
-// argument to log is p/q where q=1024 and p=floor(q / r + 0.5).
-// Thus r*p/q is close to 1.
 static const float bd0_scale[128 + 1][4] = {
   { +0x1.62e430p-1, -0x1.05c610p-29, -0x1.950d88p-54, +0x1.d9cc02p-79 }, // 128: log(2048/1024.) 
   { +0x1.5ee02cp-1, -0x1.6dbe98p-25, -0x1.51e540p-50, +0x1.2bfa48p-74 }, // 129: log(2032/1024.) 
@@ -363,8 +349,6 @@ static const float bd0_scale[128 + 1][4] = {
   } while(0)
 
 // Compute x * log (x / M) + (M - x)
-// aka -x * log1pmx ((M - x) / x)
-// Deliver the result back in two parts, *yh and *yl.
 void ebd0(double x, double M, double* yh, double* yl)
 {
     const int Sb = 10;
@@ -436,11 +420,7 @@ void ebd0(double x, double M, double* yh, double* yl)
 
 #undef ADD1
 
-//  dpois() checks argument validity and calls dpois_raw().
 //  dpois_raw() computes the Poisson probability  lb^x exp(-lb) / x!.
-//  This does not check that x is an integer, since dgamma() may
-//  call this with a fractional x argument. Any necessary argument
-//  checks should be done in the calling function.
 double dpois_raw(double x, double lambda)
 {
     if (lambda == 0)
@@ -588,7 +568,6 @@ static double pd_upper_series(double x, double y)
 }
 
 // Continued fraction for calculation of scaled upper-tail F_{gamma}
-//  ~=  (y / d) * [1 +  (1-y)/d +  O( ((1-y)/d)^2 ) ]
 static double pd_lower_cf(double y, double d)
 {
     double f = 0.0 /* -Wall */, of, f0;
@@ -673,7 +652,6 @@ static double pd_lower_series(double lambda, double y)
 }
 
 // Asymptotic expansion to calculate the probability that Poisson variate has value <= x.
-// Various assertions about this are made (without proof) at http://members.aol.com/iandjmsmith/PoissonApprox.htm
 static double ppois_asymp(double x, double lambda, bool lower_tail)
 {
     static const double coefs_a[8] = 
@@ -706,10 +684,6 @@ static double ppois_asymp(double x, double lambda, bool lower_tail)
     int i;
 
     dfm = lambda - x;
-    // If lambda is large, the distribution is highly concentrated
-    // about lambda.  So representation error in x or lambda can lead
-    // to arbitrarily large values of pt_ and hence divergence of the
-    // coefficients of this approximation.
     pt_ = -log1pmx(dfm / x);
     s2pt = sqrt(2 * x * pt_);
     if (dfm < 0)
@@ -749,12 +723,8 @@ static double ppois_asymp(double x, double lambda, bool lower_tail)
     return np + f * nd;
 }
 
-// dpois_wrap (x__1, lambda) := dpois(x__1 - 1, lambda);  where
-// dpois(k, L) := exp(-L) L^k / gamma(k+1)  {the usual Poisson probabilities}
-// and  dpois*(.., give_log = TRUE) :=  log( dpois*(..) )
 static double dpois_wrap(double x_plus_1, double lambda)
 {
-    // If |x| > |k| * M_cutoff, then  log[ exp(-x) * k^x ]	=~= -x 
     static const double M_cutoff = M_LN2 * DBL_MAX_EXP / DBL_EPSILON;  // =3.196577e18
 
     if (!isfinite(lambda))
@@ -788,8 +758,7 @@ double pgamma_raw(double x, double alph, int lower_tail)
     }
     else if (x <= alph - 1 && x < 0.8 * (alph + 50))
     {
-        // incl. large alph compared to x 
-        double sum = pd_upper_series(x, alph);  // = x/alph + o(x/alph)
+        double sum = pd_upper_series(x, alph);
         double d = dpois_wrap(alph, x);
 
         if (!lower_tail)
@@ -799,7 +768,6 @@ double pgamma_raw(double x, double alph, int lower_tail)
     }
     else if (alph - 1 < x && alph < 0.8 * (x + 50))
     {
-        // incl. large x compared to alph 
         double sum;
         double d = dpois_wrap(alph, x);
 
@@ -810,13 +778,12 @@ double pgamma_raw(double x, double alph, int lower_tail)
             else
             {
                 double f = pd_lower_cf(alph, x - (alph - 1)) * x / alph;
-                // = [alph/(x - alph+1) + o(alph/(x-alph+1))] * x/alph = 1 + o(1) 
                 sum = f;
             }
         }
         else
         {
-            sum = pd_lower_series(x, alph - 1); // = (alph-1)/x + o((alph-1)/x)
+            sum = pd_lower_series(x, alph - 1);
             sum = 1 + sum;
         }
 
@@ -827,16 +794,11 @@ double pgamma_raw(double x, double alph, int lower_tail)
     }
     else
     {
-        // x >= 1 and x fairly near alph. 
         res = ppois_asymp(alph - 1, x, !lower_tail);
     }
 
-    // We lose a fair amount of accuracy to underflow in the cases
-    // where the final result is very close to DBL_MIN.   In those
-    // cases, simply redo via log space.
     if (res < DBL_MIN / DBL_EPSILON)
     {
-        // with(.Machine, double.xmin / double.eps) #|-> 1.002084e-292 
         return exp(pgamma_raw(x, alph, lower_tail));
     }
     else
@@ -845,6 +807,7 @@ double pgamma_raw(double x, double alph, int lower_tail)
 
 double pgamma(double x, double alph, double scale, int lower_tail)
 {
+
 #ifdef IEEE_754
     if (isnan(x) || isnan(alph) || isnan(scale))
         return x + alph + scale;
@@ -861,7 +824,7 @@ double pgamma(double x, double alph, double scale, int lower_tail)
 #endif
 
     if (alph == 0.) // limit case.
-        return (x <= 0) ? 0. : 1.; // <= assert pgamma(0,0) ==> 0 
+        return (x <= 0) ? 0. : 1.;
 
     return pgamma_raw(x, alph, lower_tail);
 }
