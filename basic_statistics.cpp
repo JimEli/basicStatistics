@@ -168,11 +168,25 @@ int main()
     // In a precinct, 81% of the voters are registered Democrats. What is the probability that, in a random  
     // sample of 100 voters from this precinct, no more than 80 of the voters would be Democrats? = 0.3994
     print("No more than 80 out of 100 voters democrat:", pNormCDF(zPhat(100, 0.81, 0.8)));
-    // Poll of 238 voters finds 137 approve an amendment. Construct a 95% confidence 
-    // interval for proportion of voters supporting amendment. (0.513 to 0.638)
-    double phat = (137. / 238.), MoE = E(238, Z95CI, phat); std::cout << "95% CI: " << phat - MoE << " to " << phat + MoE << " [margin of error: +/-" << MoE << "]" << std::endl;
-    // "We are 95% confident that the 57.6% of the voters supporting the amendment is between 51.3% and 63.8%.
+    // 8.3% of all Americans have diabetes. Suppose that a random sample of 74 Americans is taken. What is the probability 
+    // that the proportion of diabetics in the sample differs from the population proportion by less than 1%? = 0.2448
+    print("Probability diabetics in sample of 74 differs from population by less than 1%:", 1. - 2 * pNormCDF(zPhat(74, 0.083, (0.083 - 0.01))));
 
+    
+    std::cout << "Cofidence Intervals\n";
+    {
+        // Poll of 238 voters finds 137 approve an amendment. Construct a 95% confidence interval for proportion of voters supporting amendment. (0.513 to 0.638)
+        double phat = (137. / 238.), MoE = E(238, Z95CI, phat); std::cout << " 95% CI: " << phat - MoE << " to " << phat + MoE << " [margin of error: +/-" << MoE << "]" << std::endl;
+        // "We are 95% confident that the 57.6% of the voters supporting the amendment is between 51.3% and 63.8%.
+    }
+    {
+        // Survey to be conducteed of random sample asking whether they favor/oppose an amendment. How many should be polled 
+        // to be sure that a 90% CI for the proportion who favor amendment will have a margin of error of 0.05.
+        // A previous survey suggest the proportion in favor will be 84%. What sample size is needed? = 146
+        double phat = 0.84, MoE = 0.05; std::cout << " 90% CI sample size: " << round(N(MoE, Z90CI, phat) + .5) << std::endl;
+        // Estimate sample size needed if no estimate of p is available. =
+        phat = 0.5; std::cout << " 90% CI sample size (no prior estimate): " << round(N(MoE, Z90CI, phat) + .5) << std::endl;
+    }
 
     std::cout << "Poisson Distributions\n";
     // Number of visits to a web page follows a Poisson distribution with mean 15 visits per hour.
