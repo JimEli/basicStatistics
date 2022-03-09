@@ -1,6 +1,8 @@
 # basicStatistics
 ## Basic C++ Statistical Functions
 
+The statistical functions herein are those coveredin a basic course of statistics.
+
 Note: work in progress. These functions are sourced from various locations around the web. Code is completely unpolished, without comments or attributions (yet).
  
 ### Basic statistical functions performed on a vector of data:
