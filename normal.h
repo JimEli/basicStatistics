@@ -59,7 +59,7 @@ double dNorm(const double x, const double mu = 0., const double sigma = 1.)
     return 0.;
     
   if (!isfinite(x) && mu == x)
-    return NAN; // x-mu is NaN 
+    return NAN;
 
   if (sigma == 0)
     return (x == mu) ? ML_POSINF : 0.;
@@ -94,7 +94,6 @@ double pNormCDF(double x)
 
     x = fabs(x) / sqrt(2.);
 
-    // Handbook of Mathematical Functions by Abramowitz & Stegun, formula 7.1.26.
     double t = 1. / (1. + p * x);
     double y = 1. - (((((a5 * t + a4) * t) + a3) * t + a2) * t + a1) * t * exp(-x * x);
 
