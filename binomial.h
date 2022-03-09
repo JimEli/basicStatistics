@@ -66,12 +66,11 @@ static double doBinomSearch(double y, double* z, double p, double n, double pr, 
 {
     if (*z >= p) 
     {
-        // search to the left 
+        // Search to left.
         for (;;) 
         {
             double newz;
 
-            //if (y == 0 || (newz = pbinom(y - incr, n, pr, true, false)) < p)
             if (y == 0 || (newz = pBinom((unsigned)(y - incr), (unsigned)n, pr)) < p)
                 return y;
             y = fmax2(0, y - incr);
@@ -80,11 +79,10 @@ static double doBinomSearch(double y, double* z, double p, double n, double pr, 
     } 
     else 
     {		
-        // search to the right 
+        // Search to right.
         for (;;) 
         {
             y = fmin2(y + incr, n);
-            //if (y == n || (*z = pbinom(y, n, pr, false)) >= p)
             if (y == n || (*z = pBinom((unsigned)y, (unsigned)n, pr)) >= p)
                 return y;
         }
@@ -92,9 +90,6 @@ static double doBinomSearch(double y, double* z, double p, double n, double pr, 
 }
 
 // The quantile function of the binomial distribution.
-// Uses the Cornish-Fisher Expansion to include a skewness correction to a normal approximation. This gives an
-// initial value which never seems to be off by more than 1 or 2. A search is then conducted of values close to
-// this initial start point.
 double qBinom(double p, double n, double pr)
 {
     double q, mu, sigma, gamma, z, y;
@@ -107,8 +102,6 @@ double qBinom(double p, double n, double pr)
     if (!isfinite(n) || !isfinite(pr))
         return NAN;
 
-    // if log_p is true, p = -Inf is a legitimate value 
-    //if (!isfinite(p) && !log_p) return NAN;
     if (!isfinite(p))
         return NAN;
 
@@ -130,34 +123,28 @@ double qBinom(double p, double n, double pr)
 
     q = 1 - pr;
     if (q == 0.)
-        return n; // covers the full range of the distribution 
+        return n;
 
     mu = n * pr;
     sigma = sqrt(n * pr * q);
     gamma = (q - pr) / sigma;
 
-    // temporary hack --- FIXME --- 
     if (p + 1.01 * DBL_EPSILON >= 1.)
         return n;
 
-    // y := approx.value (Cornish-Fisher expansion): 
-    //z = qnorm(p, 0., 1., true, false);
     z = qNorm(p, 0., 1.);
     y = floor(mu + sigma * (z + gamma * (z * z - 1) / 6) + 0.5);
 
-    if (y > n) // way off 
+    if (y > n) 
         y = n;
 
-    //z = pbinom(y, n, pr, true, false);
     z = pBinom((unsigned)y, (unsigned)n, pr);
 
-    // fuzz to ensure left continuity: 
     p *= 1 - 64 * DBL_EPSILON;
 
     if (n < 1e5)
         return doBinomSearch(y, &z, p, n, pr, 1);
 
-    // Otherwise be a bit cleverer in the search 
     double incr = floor(n * 0.001), oldincr;
 
     do 
