@@ -1,9 +1,9 @@
 # basicStatistics
-##Basic C++ Statistical Functions
+## Basic C++ Statistical Functions
 
 Functions sourced from various locations around the web.
-
-###Basic statistical functions performed on a vector of data:
+ 
+### Basic statistical functions performed on a vector of data:
 <ol>
   <li>mean</li>
   <li>median</li>
@@ -14,7 +14,7 @@ Functions sourced from various locations around the web.
 </ol>
 
 
-###The following functions act basically like the identical versions found in R:
+### The following functions act basically like the identical versions found in R:
 <ol>
   <li>pnorm, qnorm, dnorm</li>
   <li>pbinom, qbinom, dbinom</li>
