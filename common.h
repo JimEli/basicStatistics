@@ -45,9 +45,13 @@ double zCLT(const double x, const double mu, const double sigma) { return ((x - 
 double xCLT(const double z, const double mu, const double sigma) { return (mu + (z * sigma)); }
 double zPhat(const double n, const double p, const double phat) { return (phat - p) / sqrt(p * (1. - p) / n); }
 
-// Confidence intervals/margin of error.
+// Confidence intervals Margin of Error.
 double E(const double n, const double z, const double phat) { return (z * sqrt(phat * (1. - phat) / n)); }
-constexpr double Z95CI = 1.95996; // -1.95996 also.
+// Confidence intervals n. 
+double N(const double MoE, const double z, const double phat) { return (phat * (1. - phat) * pow((z / MoE), 2.)); }
+// Confidence intervals z-scores.
+constexpr double Z95CI = 1.95996; // -1.95996 (right tail). Z95CI = qNorm(.95 + (1 - .95)/ 2);
+constexpr double Z90CI = 1.64485; // -1.64485 (right tail).
 
 double fmax2(double x, double y)
 {
