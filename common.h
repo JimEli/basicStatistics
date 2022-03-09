@@ -6,6 +6,8 @@
 #include <math.h>
 #include <float.h>
 #include <limits>
+#include <algorithm>
+#include <numeric>
 #include <cassert>
 
 #define IEEE_754 1
