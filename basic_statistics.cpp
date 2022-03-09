@@ -173,7 +173,7 @@ int main()
     print("Probability diabetics in sample of 74 differs from population by less than 1%:", 1. - 2 * pNormCDF(zPhat(74, 0.083, (0.083 - 0.01))));
 
     
-    std::cout << "Cofidence Intervals\n";
+    std::cout << "Confidence Intervals for Population Proportions\n";
     {
         // Poll of 238 voters finds 137 approve an amendment. Construct a 95% confidence interval for proportion of voters supporting amendment. (0.513 to 0.638)
         double phat = (137. / 238.), MoE = E(238, Z95CI, phat); std::cout << " 95% CI: " << phat - MoE << " to " << phat + MoE << " [margin of error: +/-" << MoE << "]" << std::endl;
