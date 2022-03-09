@@ -19,7 +19,7 @@ double dgamma(double x, double shape, double scale)
     if (x < 0)
         return 0.;
 
-    if (shape == 0) // point mass at 0 
+    if (shape == 0) 
         return (x == 0) ? ML_POSINF : 0.;
 
     if (x == 0)
@@ -30,23 +30,17 @@ double dgamma(double x, double shape, double scale)
         if (shape > 1)
             return 0.;
 
-        // else 
-        //return give_log ? -log(scale) : 1 / scale;
         return 1 / scale;
     }
 
     if (shape < 1)
     {
         pr = dpois_raw(shape, x / scale);
-        // NB: currently *always*  shape/x > 0  if shape < 1:
-        // -- overflow to Inf happens, but underflow to 0 does NOT: 
-        // shape/x overflows to +Inf 
-        //return (give_log ? pr + (isfinite(shape / x) ? log(shape / x) : log(shape) - log(x)) : pr * shape / x);
         return (pr * shape / x);
     }
-    // else  shape >= 1 
+
     pr = dpois_raw(shape - 1, x / scale);
-    //return give_log ? pr - log(scale) : pr / scale;
+
     return pr / scale;
 }
 
@@ -61,8 +55,6 @@ double qchisq_appr(double p, double nu, double g /* = log Gamma(nu/2) */, double
     double alpha, a, c, ch, p1;
     double p2, q, t, x;
 
-    // test arguments and initialise 
-
 #ifdef IEEE_754
     if (isnan(p) || isnan(nu))
         return p + nu;
@@ -74,34 +66,25 @@ double qchisq_appr(double p, double nu, double g /* = log Gamma(nu/2) */, double
     if (nu <= 0)
         return NAN;
 
-    alpha = 0.5 * nu;  // = [pq]gamma() shape
+    alpha = 0.5 * nu; 
     c = alpha - 1;
 
     if (nu < (-1.24) * (p1 = log(p)))
     {	
-        // for small chi-squared 
-        // log(alpha) + g = log(alpha) + log(gamma(alpha)) =
-        //   = log(alpha*gamma(alpha)) = lgamma(alpha+1) suffers from
-        //   catastrophic cancellation when alpha << 1
         double lgam1pa = (alpha < 0.5) ? lgamma1p(alpha) : (log(alpha) + g);
         ch = exp((lgam1pa + p1) / alpha + M_LN2);
     }
     else if (nu > 0.32)
     {
-        //  using Wilson and Hilferty estimate 
-        //x = qnorm(p, 0, 1, lower_tail, log_p);
         x = qNorm(p, 0., 1.);
         p1 = 2. / (9 * nu);
         ch = nu * pow(x * sqrt(p1) + 1 - p1, 3);
 
-        // approximation for p tending to 1: 
         if (ch > 2.2 * nu + 6)
             ch = -2 * (log1p(-p) - c * log(0.5 * ch) + g);
-
     }
     else
     {
-        // "small nu" : 1.24*(-log(p)) <= nu <= 0.32 
         ch = 0.4;
         a = log1p(p) + g + c * M_LN2;
         do {
@@ -128,8 +111,6 @@ double qgamma(double p, double alpha, double scale, int lower_tail) // shape = a
     double p_, a, b, c, g, ch, ch0, p1;
     double p2, q, s1, s2, s3, s4, s5, s6, t, x;
 
-    // test arguments and initialise 
-
 #ifdef IEEE_754
     if (isnan(p) || isnan(alpha) || isnan(scale))
         return p + alpha + scale;
@@ -137,39 +118,37 @@ double qgamma(double p, double alpha, double scale, int lower_tail) // shape = a
 
     if (p < 0 || p > 1)
       return NAN;
+
     if (p == 0)
       return 0.;
+    
     if (p == 1)
       return ML_POSINF;
 
     if (alpha < 0 || scale <= 0)
         return NAN;
-    if (alpha == 0) // all mass at 0:
+    
+    if (alpha == 0) 
         return 0.;
 
-    p_ = p; // lower_tail prob (in any case) 
+    p_ = p; 
 
-    g = lgamma(alpha); // log Gamma(v/2) 
-
-    //----- Phase I : Starting Approximation 
+    g = lgamma(alpha); 
 
     ch = qchisq_appr(p, 2 * alpha, g, EPS1);
     if (!isfinite(ch))
         goto END;
 
     if (ch < EPS2)
-        goto END;  // and do Newton steps 
+        goto END; 
 
     if (p_ > pMAX || p_ < pMIN)
-        goto END;  // and do Newton steps 
-
-      // ----- Phase II: Iteration
-      // Call pgamma() [AS 239]	and calculate seven term taylor series
+        goto END;  
 
     c = alpha - 1;
-    s6 = (120 + c * (346 + 127 * c)) * i5040;  // used below, is "const" 
+    s6 = (120 + c * (346 + 127 * c)) * i5040;  
 
-    ch0 = ch;  // save initial approx. 
+    ch0 = ch;  
     for (unsigned i = 1; i <= MAXIT; i++)
     {
         q = ch;
@@ -202,7 +181,6 @@ double qgamma(double p, double alpha, double scale, int lower_tail) // shape = a
 
         if (fabs(q - ch) > 0.1 * ch)
         {
-            // diverging? -- also forces ch > 0 
             if (ch < q)
                 ch = 0.9 * q; else ch = 1.1 * q;
         }
