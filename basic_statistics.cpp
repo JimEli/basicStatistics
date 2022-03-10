@@ -172,22 +172,103 @@ int main()
     // that the proportion of diabetics in the sample differs from the population proportion by less than 1%? = 0.2448
     print("Probability diabetics in sample of 74 differs from population by less than 1%:", 1. - 2 * pNormCDF(zPhat(74, 0.083, (0.083 - 0.01))));
 
-    
+
     std::cout << "Confidence Intervals for Population Proportions\n";
     {
-        // Poll of 238 voters finds 137 approve an amendment. Construct a 95% confidence interval for proportion of voters supporting amendment. (0.513 to 0.638)
-        double phat = (137. / 238.), MoE = E(238, Z95CI, phat); std::cout << " 95% CI: " << phat - MoE << " to " << phat + MoE << " [margin of error: +/-" << MoE << "]" << std::endl;
-        // "We are 95% confident that the 57.6% of the voters supporting the amendment is between 51.3% and 63.8%.
-    }
-    {
-        // Survey to be conducteed of random sample asking whether they favor/oppose an amendment. How many should be polled 
-        // to be sure that a 90% CI for the proportion who favor amendment will have a margin of error of 0.05.
-        // A previous survey suggest the proportion in favor will be 84%. What sample size is needed? = 146
-        double phat = 0.84, MoE = 0.05; std::cout << " 90% CI sample size: " << round(N(MoE, Z90CI, phat) + .5) << std::endl;
-        // Estimate sample size needed if no estimate of p is available. =
-        phat = 0.5; std::cout << " 90% CI sample size (no prior estimate): " << round(N(MoE, Z90CI, phat) + .5) << std::endl;
+        {
+            // Poll of 238 voters finds 137 approve an amendment. Construct a 95% confidence 
+            // interval for proportion of voters supporting amendment. =(0.513 to 0.638)
+            double phat = (137. / 238.), E = proportionMoE(238, Z95CI, phat);
+            std::cout << " 95% CI: " << phat - E << " to " << phat + E << " [margin of error: +/-" << E << "]" << std::endl;
+            // "We are 95% confident that the percentage of voters supporting the amendment is between 51.3% and 63.8% (57.6%).
+        }
+        {
+            // Random sample of 250 college students determines their study hours have a sample mean of xbar=15.7 hours per week. 
+            // If margin of error for the data using 95%CI is E=0.6 hours, construct a 95% confidence interval for the data. =(15.1 to 16.3)
+            double phat = 15.7, E = 0.6;
+            std::cout << " 95% CI: " << phat - E << " to " << phat + E << " [margin of error: +/-" << E << "]" << std::endl;
+            // "We are 95% confident that the study hours are between 15.1 and 16.3 hrs (15.7)"
+        }
+        {
+            // Survey to be conducteed of random sample asking whether they favor/oppose an amendment. How many should be polled 
+            // to be sure that a 90% CI for the proportion who favor amendment will have a margin of error of 0.05.
+            // A previous survey suggest the proportion in favor will be 84%. What sample size is needed? = 146
+            double phat = 0.84, E = 0.05; std::cout << " 90% CI sample size: " << round(proportionN(E, Z90CI, phat) + .5) << std::endl;
+            // Estimate sample size needed if no estimate of p is available. = 271
+            phat = 0.5; std::cout << " 90% CI sample size (no prior estimate): " << round(proportionN(E, Z90CI, phat) + .5) << std::endl;
+        }
+        {
+            // A newspaper wants to predict outcome of election by estimating proportion voters supporting particular 
+            // candidate. What sample size is needed to yield an estimate within 3% with 97% CI? =1309
+            double phat = 0.5, E = 0.03; std::cout << " 97% CI sample size: " << round(proportionN(E, qNorm(.97 + (1 - .97) / 2), phat) + .5) << std::endl;
+        }
     }
 
+    std::cout << "Confidence Intervals for Population Means\n";
+    {
+        {
+            // Random survey sample of 43 renters found mean rent of $940 with 
+            // standard deviation of $300. Construct a 91% CI for the mean rent. =(860.6 to 1019.4)
+            unsigned n = 43 - 1; double xbar = 940, t = qt(1 - ((1 - .91) / 2), n), E = meanMoE(n, t, 300);
+            std::cout << " 91% CI: " << xbar - E << " to " << xbar + E << " [margin of error: +/-" << E << "]" << std::endl;
+            // "We are 91% confident that the mean rent is between $860.6 and $1019.4 ($940)"
+        }
+        {
+            // We want an estimate of proportion of students who log into Facebook daily. 
+            // Out of random sample of 200 students, 134 report logging in daily.
+            // Construct 86% CI for proportion that log in daily. =(62.1 to 71.9)
+            double phat = 134. / 200, E = proportionMoE(200, qNorm(.86 + (1 - .86) / 2), phat);
+            std::cout << " 86% CI: " << phat - E << " to " << phat + E << " [margin of error: +/-" << E << "]" << std::endl;
+            // "We are 86% confident that the mean log ins is between 62.1 and 71.9% (67%)"
+        }
+        {
+            // to determine mean hours per week a person watches TV, how many people needed to estimate number hours within 2 hours 
+            // with 94% CI? Results from previous survey indicate hours watched per week has a standard deviation of 7.5 hours. =50
+            double z = qNorm(.94 + (1 - .94) / 2); std::cout << " 94% CI sample size: " << round(meanN(2, z, 7.5) + .5) << std::endl;
+        }
+    }
+
+
+    std::cout << "Hypothesis Testing for Proportions\n";
+    {
+        {
+            // McDonald's claims Monopoly game has 1 in 4 instant winners. 530 attempts, you win 112 (21%). Use alpha=0.05 significance.
+            // State null and alternative hypothesis: H0 = "Game has win percentge of 25% (p=0.25)", H1 = "Game has win percentage < 25% (p<0.25)".
+            // Find critical value and rejection region. =-1.645, left-tailed
+            std::cout << " critcal z value: " << qNorm(0.05) << std::endl;
+            // Find z statistic. = -2.073
+            double phat = 112. / 530, p0 = 0.25; unsigned n = 530; double z = proportionHypothesisZ(n, phat, p0); print("z:", z);
+            // Find p-value. =0.019
+            double p = pNorm(z); print("p-value:", p);
+            // Reject or accept H0? =[Our results (112 in 530) occur only 1.9% of time (.019<.05, or -2.073<-1.645), so reject H0]
+            std::cout << " We ";  DecideHypothesis(p, 0.05);
+            // State conclusion in sentence.
+            std::cout << " At 0.05 level of significance, there is enough evidence to conclude that win rate is less than 25%.\n";
+        }
+    }
+
+
+    std::cout << "Hypothesis Testing for Means\n";
+    {
+        {
+            // Random sample of 50 pumpkins has mean circumference of 40.5cm with standard devication 1.6cm. Can you conclude 
+            // mean circumference of all pumpkins is more than 40cm. Use alpha=0.01 significance level?
+            // State null and alternative hypothesis: H0 = "Pumpkin mean circumference equals 40cm (mu=40)", H1 = "Pumpkin mean circumference is greater than 40cm (mu>40)".
+            // Find critical value and rejection region. =2.405, right-tailed
+            unsigned n = 50, DoF = n - 1; std::cout << " critcal t value: " << qt(1. - .01, DoF) << std::endl;
+            // Find t statistic. =2.210
+            double xbar = 40.5, mu = 40., sigma = 1.6, t = meanHypothesisT(n, xbar, mu, sigma); print("t:", t);
+            // Find p-value. 0.016
+            double p = 1. - pt(t, DoF); print("p-value:", p);
+            // Reject or accept H0? =[Pumpkin mean circumferences >40 occur 1.6% of time (.016<.01, or 2.210<2.405), so do not reject H0]
+            std::cout << " We ";  DecideHypothesis(p, 0.01);
+            // State conclusion in sentence.
+            std::cout << " At 0.01 level of significance, there is not enough evidence to conclude that all pumpkin mean circumference > 40cm.\n";
+
+        }
+    }
+    
+    
     std::cout << "Poisson Distributions\n";
     // Number of visits to a web page follows a Poisson distribution with mean 15 visits per hour.
     // What is probability of getting 10 or less visits per hour, P(X≤10)? =0.118
@@ -198,12 +279,8 @@ int main()
     print("3 blemishes on metal:", dPois(3, 1.2));
 
 
+    std::cout << "Chi Square Distributions\n";
     std::cout << "dchisq=" << dchisq(5, 10);
     std::cout << ", pchisq=" << pchisq(5, 10);
     std::cout << ", qchisq=" << qchisq(.1, 200) << std::endl;
-
-
-    std::cout << "qt=" << qt(.1, 5);
-    std::cout << ", dt=" << dt(.1, 5);
-    std::cout << ", pt=" << pt(.5, 100) << std::endl;
 }
