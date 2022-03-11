@@ -232,7 +232,7 @@ int main()
     std::cout << "Hypothesis Testing for Proportions\n";
     {
         {
-            // McDonald's claims Monopoly game has 1 in 4 instant winners. 530 attempts, you win 112 (21%). Use alpha=0.05 significance.
+            // McDonald's claims Monopoly game has 1 in 4 instant winners. After 530 attempts, you win 112 (21%). Use alpha=0.05 significance.
             // State null and alternative hypothesis: H0 = "Game has win percentge of 25% (p=0.25)", H1 = "Game has win percentage < 25% (p<0.25)".
             // Find critical value and rejection region. =-1.645, left-tailed
             std::cout << " critcal z value: " << qNorm(0.05) << std::endl;
