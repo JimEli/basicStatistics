@@ -232,18 +232,34 @@ int main()
     std::cout << "Hypothesis Testing for Proportions\n";
     {
         {
-            // McDonald's claims Monopoly game has 1 in 4 instant winners. After 530 attempts, you win 112 (21%). Use alpha=0.05 significance.
+            // McDonald's claims Monopoly game has 1 in 4 instant winners. 530 attempts, you win 112 (21%). Use alpha=0.05 significance.
             // State null and alternative hypothesis: H0 = "Game has win percentge of 25% (p=0.25)", H1 = "Game has win percentage < 25% (p<0.25)".
             // Find critical value and rejection region. =-1.645, left-tailed
             std::cout << " critcal z value: " << qNorm(0.05) << std::endl;
             // Find z statistic. = -2.073
-            double phat = 112. / 530, p0 = 0.25; unsigned n = 530; double z = proportionHypothesisZ(n, phat, p0); print("z:", z);
+            unsigned n = 530; double phat = 112. / n, p0 = 0.25, z = proportionHypothesisZ(n, phat, p0); print("z:", z);
             // Find p-value. =0.019
             double p = pNorm(z); print("p-value:", p);
             // Reject or accept H0? =[Our results (112 in 530) occur only 1.9% of time (.019<.05, or -2.073<-1.645), so reject H0]
             std::cout << " We ";  DecideHypothesis(p, 0.05);
             // State conclusion in sentence.
-            std::cout << " At 0.05 level of significance, there is enough evidence to conclude that win rate is less than 25%.\n";
+            std::cout << "  At 0.05 level of significance, there is enough evidence to conclude that win rate is less than 25%.\n";
+        }
+        {
+            // Survey reports 15% of college student read newspaper daily. A researcher wants to know if percentage of newspaper readers among 
+            // students at Specific college differs from percentage in general. A random sample survey of 200 at Specific college finds 40 read 
+            // newspaper daily. Can it be concluded that proportion of reders at Specific college differs from 15%? Use alpha=0.03 level of significance.
+            // State null and alternative hypothesis: H0 = "Specific college newspaper readers equal 15% (p=0.15)", H1 = "Specfic college newspaper readers does not equal 15% (p!=0.15)".
+            // Find critical value and rejection region. =+/-2.170, two-tailed (right & left)
+            std::cout << " critcal z value: " << qNorm(.03/2) << " and " << qNorm(1. - (.03/2)) << std::endl;
+            // Find z statistic. =-1.980
+            unsigned n = 200; double phat = 40. / n, p0 = 0.15, z = proportionHypothesisZ(n, phat, p0); print("z:", z);
+            // Find p-value. =0.048
+            double p = 2.*pNorm(-z); print("p-value:", p);
+            // Reject or accept H0? =[Results (40 in 200) occur only 4.8% of time (0.048<0.03, or -1.98<-2.17), so don't reject H0]
+            std::cout << " We ";  DecideHypothesis(p, .03);
+            // State conclusion in sentence.
+            std::cout << "  At 0.03 level of significance, there is not enough evidence to conclude that Specific college students daily newspaper readers differs from 15%.\n";
         }
     }
 
@@ -258,13 +274,27 @@ int main()
             unsigned n = 50, DoF = n - 1; std::cout << " critcal t value: " << qt(1. - .01, DoF) << std::endl;
             // Find t statistic. =2.210
             double xbar = 40.5, mu = 40., sigma = 1.6, t = meanHypothesisT(n, xbar, mu, sigma); print("t:", t);
-            // Find p-value. 0.016
+            // Find p-value. =0.016
             double p = 1. - pt(t, DoF); print("p-value:", p);
             // Reject or accept H0? =[Pumpkin mean circumferences >40 occur 1.6% of time (.016<.01, or 2.210<2.405), so do not reject H0]
             std::cout << " We ";  DecideHypothesis(p, 0.01);
             // State conclusion in sentence.
-            std::cout << " At 0.01 level of significance, there is not enough evidence to conclude that all pumpkin mean circumference > 40cm.\n";
-
+            std::cout << "  At 0.01 level of significance, there is not enough evidence to conclude that all pumpkin mean circumference > 40cm.\n";
+        }
+        {
+            // Mean annual tuition for a sample of 12 colleges was $39,200 with standard deviation of $4300. 
+            // Can you conclude that mean tuition for private colleges is differnet from $35,500. Use alpha=0.03 significance level.
+            // State null and alternative hypothesis: H0 = "Private college mean tuition equals $35,500 (mu=35500)", H1 = "Private college mean tuition does not equal $35,500 (mu!=35500)".
+            // Find critical value and rejection region. = +/-2.491, two-tailed (left & right)
+            unsigned n = 12, DoF = n - 1; std::cout << " critcal t value: " << qt(.03/2, DoF) << " and " << qt(1. - (.03 / 2), DoF) << std::endl;
+            // Find t statistic. =-2.981
+            double xbar = 39200., mu =35500., sigma = 4300., t = meanHypothesisT(n, xbar, mu, sigma); print("t:", t);
+            // Find p-value. =0.013
+            double p = 2.*pt(-t, DoF); print("p-value:", p);
+            // Reject or accept H0? =[Mean college tuituion equals 35500 at 0.6% of time (.013<.03, or -2.98<-2.491), so do not reject H0]
+            std::cout << " We ";  DecideHypothesis(p, 0.03);
+            // State conclusion in sentence.
+            std::cout << "  At 0.03 level of significance, there is enough evidence to conclude that college mean tuituion is different from $35,500.\n";
         }
     }
     
