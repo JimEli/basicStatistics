@@ -243,7 +243,7 @@ int main()
             // Reject or accept H0? =[Our results (112 in 530) occur only 1.9% of time (.019<.05, or -2.073<-1.645), so reject H0]
             std::cout << " We ";  DecideHypothesis(p, 0.05);
             // State conclusion in sentence.
-            std::cout << "  At 0.05 level of significance, there is enough evidence to conclude that win rate is less than 25%.\n";
+            std::cout << " At 0.05 level of significance, there is enough evidence to conclude that win rate is less than 25%.\n";
         }
         {
             // Survey reports 15% of college student read newspaper daily. A researcher wants to know if percentage of newspaper readers among 
@@ -259,7 +259,7 @@ int main()
             // Reject or accept H0? =[Results (40 in 200) occur only 4.8% of time (0.048<0.03, or -1.98<-2.17), so don't reject H0]
             std::cout << " We ";  DecideHypothesis(p, .03);
             // State conclusion in sentence.
-            std::cout << "  At 0.03 level of significance, there is not enough evidence to conclude that Specific college students daily newspaper readers differs from 15%.\n";
+            std::cout << " At 0.03 level of significance, there is not enough evidence to conclude that Specific college students daily newspaper readers differs from 15%.\n";
         }
     }
 
@@ -279,7 +279,7 @@ int main()
             // Reject or accept H0? =[Pumpkin mean circumferences >40 occur 1.6% of time (.016<.01, or 2.210<2.405), so do not reject H0]
             std::cout << " We ";  DecideHypothesis(p, 0.01);
             // State conclusion in sentence.
-            std::cout << "  At 0.01 level of significance, there is not enough evidence to conclude that all pumpkin mean circumference > 40cm.\n";
+            std::cout << " At 0.01 level of significance, there is not enough evidence to conclude that all pumpkin mean circumference > 40cm.\n";
         }
         {
             // Mean annual tuition for a sample of 12 colleges was $39,200 with standard deviation of $4300. 
@@ -294,7 +294,75 @@ int main()
             // Reject or accept H0? =[Mean college tuituion equals 35500 at 0.6% of time (.013<.03, or -2.98<-2.491), so do not reject H0]
             std::cout << " We ";  DecideHypothesis(p, 0.03);
             // State conclusion in sentence.
-            std::cout << "  At 0.03 level of significance, there is enough evidence to conclude that college mean tuituion is different from $35,500.\n";
+            std::cout << " At 0.03 level of significance, is enough evidence to conclude that college mean tuituion is different from $35,500.\n";
+        }
+    }
+
+
+    std::cout << "Two-Sample Hypothesis Testing for Proportions\n";
+    {
+        // Type I Error: When we reject H0, but in reality H0 is true. 
+        // * Probability of this error is alpha. 
+        // * Reduce probability of this error by lowering alpha.
+        // Type II Error: When we don't reject H0, but in reality H0 was false. 
+        // * Probability of this error is beta. 
+        // * Reduce probability of this error by increasing sample size.
+        {
+            // A new medicine test with sample of 2529 people, 1304 in control group given placebo and 1225 in treatment group 
+            // given medicine. 150 in control group and 113 in treatment group got sick. Can company conclude that proportion 
+            // who got sick differs between control/treatment groups? Use alpha=0.07 level of significance. Control group=p1.
+            // State null and alternative hypothesis: H0 = "Proportion who got sick in placebo and treatment groups are equal (p1=p2)", H1 = "... placebo and teratment groups are not equal (p1!=p2)".
+            // Find critical value and rejection region. =+/-1.812, two-tailed (left & right)
+            std::cout << " critcal z value: " << qNorm(0.07 / 2) << " and " << qNorm(1. - (0.07 / 2)) << std::endl;
+            // Find z statistic. = 1.894
+            unsigned n1 = 1304, n2 = 1225; double phat1 = 150. / n1, phat2 = 113. / n2, p0 = 0.07, z = proportionHypothesisZ2(n1, n2, phat1, phat2); print("z:", z);
+            // Find p-value. = 0.058
+            double p = 2. * pNorm(-z); print("p-value:", p);
+            // Reject or accept H0? =[Differnece between group could have occurred 5.8% of time (.061<.07, or -1.894<-1.812), so reject H0]
+            std::cout << " We ";  DecideHypothesis(p, 0.07);
+            // State conclusion in sentence.
+            std::cout << " At 0.07 level of significance, there is enough evidence to conclude that proportion who got sick in Placebo differs from treatment group.\n";
+            // What type of error could have occurred, and what is the probablility? =Type I Error, probability=0.07 (alpha)
+        }
+    }
+
+    std::cout << "Two-Sample Hypothesis Testing for Means\n";
+    {
+        {
+            // Random sample of 17 business majors had mean 2.81 GPA with standard deviation of 0.27. A random survey of 23 
+            // psychology majors had mean 2.97 GPA with standard deviation of 0.23. Can you conclude that mean GPA of psychology 
+            // majors is greater than business majors? Use alpha = 0.02 significance level. Psychology majors=mu1. 
+            // State null and alternative hypothesis: H0 = "Mean GPA of business and psychology majors are equal (mu1=mu2)", H1 = "Mean GPA of psychology majors is greater than business majors (mu1>mu2)".
+            // Find critical value and rejection region. =2.235, right-tailed
+            unsigned n1 = 23, n2 = 17, DoF = n2 - 1; std::cout << " critcal t value: " << qt(1. - .02, DoF) << std::endl;
+            // Find t statistic. =1.971
+            double xbar1 = 2.97, xbar2 = 2.81, sigma1 = 0.23, sigma2 = 0.27, t = meanHypothesisT2(n1, n2, xbar1, xbar2, sigma1, sigma2); print("t:", t);
+            // Find p-value. =0.033
+            double p = 1. - pt(t, DoF); print("p-value:", p);
+            // Reject or accept H0? =[Mean psychology GPA > business 3.3% of time (.033<.02, or 1.971>2.235), so don't reject H0]
+            std::cout << " We ";  DecideHypothesis(p, 0.02);
+            // State conclusion in sentence.
+            std::cout << " At 0.02 level of significance, there is not enough evidence to conclude mean psychology GPAs > business GPAs.\n";
+            // What type of error could have occurred, and what is the probablility? =Type II Error, probability=xx (beta)
+        }
+        {
+            // Concetration of benzene in 5 random samples of untreated wastewater had mean of 7.8mg/L with standard deviation 1.4mg/L. 
+            // 7 random specimens of treated wastewater had means of 3.2mg/L with standard deviation 1.7mg/L. Assume both samples from 
+            // approx normal populations. Can you conclude mean concentration is less in treated wastewater vs untreated? Use alpha=0.03 
+            // level. mu1=treated, m2=untreated. 
+            // State null and alternative hypothesis: H0 = "Mean benzene in untreate equals treated (mu1=mu2)", H1 = "Mean concentration of treated is less than untreated (mu1>mu2)".
+
+            // Find critical value and rejection region. =-2.601, left-tailed
+            unsigned n1 = 7, n2 = 5, DoF = n2 - 1; std::cout << " critcal t value: " << qt(.03, DoF) << std::endl;
+            // Find t statistic. =-5.127
+            double xbar1 = 3.2, xbar2 = 7.8, sigma1 = 1.7, sigma2 = 1.4, t = meanHypothesisT2(n1, n2, xbar1, xbar2, sigma1, sigma2); print("t:", t);
+            // Find p-value. =0.003
+            double p = pt(t, DoF); print("p-value:", p);
+            // Reject or accept H0? =[Mean psychology GPA > business 3.3% of time (.033<.02, or 1.971>2.235), so don't reject H0]
+            std::cout << " We ";  DecideHypothesis(p, 0.02);
+            // State conclusion in sentence.
+            std::cout << " At 0.03 level of significance, there is enough evidence to conclude treated wastewater benzene is less than untreated.\n";
+            // What type of error could have occurred, and what is the probablility? =Type I Error, probability=alpha (0.03)
         }
     }
     
