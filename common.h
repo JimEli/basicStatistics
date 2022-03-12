@@ -53,6 +53,16 @@ constexpr double Z90CI = 1.64485; // -1.64485 (right tail).
 // Hypothesis testing z and t.
 double proportionHypothesisZ(const unsigned n, const double phat, const double p0) { return ((phat - p0) / sqrt((p0 * (1. - p0)) / n)); }
 double meanHypothesisT(const unsigned n, const double xbar, const double mu, const double sigma) { return ((xbar - mu) / (sigma / sqrt(n))); }
+// 2-sample test.
+double proportionHypothesisZ2(const unsigned n1, const unsigned n2, const double phat1, const double phat2) 
+{
+    double phat = ((phat1 * n1) + (phat2 * n2)) / (n1 + n2);
+    return ((phat1 - phat2) / sqrt(phat * (1. - phat) * ((1. / n1) + (1. / n2))));
+}
+double meanHypothesisT2(const unsigned n1, const unsigned n2, const double xbar1, const double xbar2, const double sigma1, const double sigma2)
+{
+    return ((xbar1 - xbar2) / sqrt(((sigma1 * sigma1) / n1) + ((sigma2 * sigma2) / n2)));
+}
 #define DecideHypothesis(pValue, alpha)  (pValue < alpha) ? std::cout << "reject H0\n" : std::cout << "don't reject H0\n"
 
 double fmax2(double x, double y)
