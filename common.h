@@ -34,7 +34,7 @@ extern double qNorm(const double, const double, const double);
 #endif
 
 // Utilities for use with the central limit theorem and normal distributions.
-double qSigmaCLT(const double n, const double sigma) { return(sigma / sqrt(n)); }
+double qSigmaCLT(const double n, const double sigma) { return (sigma / sqrt(n)); }
 double pSigmaCLT(const double n, const double p) { return (sqrt((p * (1. - p)) / n)); }
 double zCLT(const double x, const double mu, const double sigma) { return ((x - mu) / sigma); }
 double xCLT(const double z, const double mu, const double sigma) { return (mu + (z * sigma)); }
@@ -42,18 +42,20 @@ double zPhat(const double n, const double p, const double phat) { return (phat -
 
 // Confidence intervals Margin of Error.
 double proportionMoE(const double n, const double z, const double phat) { return (z * sqrt(phat * (1. - phat) / n)); }
+double proportionMoE2(const unsigned n1, unsigned n2, const double z, const double phat1, const double phat2) { return z * sqrt((phat1 * (1. - phat1)) / n1 + (phat2 * (1. - phat2)) / n2); }
 double meanMoE(const double n, const double t, const double sigma) { return (t * (sigma / sqrt(n))); }
+double meanMoE2(const unsigned n1, const unsigned n2, const double sigma1, const double sigma2, const double t) { return (t * sqrt((sigma1 * sigma1 / n1) + (sigma2 * sigma2 / n2))); }
 // Confidence intervals n. 
 double proportionN(const double MoE, const double z, const double phat) { return (phat * (1. - phat) * pow((z / MoE), 2.)); }
-double meanN(const double MoE, const double z, const double sigma) { return pow((z * sigma) / MoE, 2); }
+double meanN(const double MoE, const double z, const double sigma) { return pow((z*sigma)/MoE, 2); }
 // Confidence intervals z-scores.
 constexpr double Z95CI = 1.95996; // -1.95996 (right tail). Z95CI = qNorm(.95 + (1 - .95)/ 2);
 constexpr double Z90CI = 1.64485; // -1.64485 (right tail).
 
-// Hypothesis testing z and t.
+// Hypothesis testing z and t, 1-sample.
 double proportionHypothesisZ(const unsigned n, const double phat, const double p0) { return ((phat - p0) / sqrt((p0 * (1. - p0)) / n)); }
 double meanHypothesisT(const unsigned n, const double xbar, const double mu, const double sigma) { return ((xbar - mu) / (sigma / sqrt(n))); }
-// 2-sample test.
+// Hypothesis testing z and t, 2-sample.
 double proportionHypothesisZ2(const unsigned n1, const unsigned n2, const double phat1, const double phat2) 
 {
     double phat = ((phat1 * n1) + (phat2 * n2)) / (n1 + n2);
@@ -63,7 +65,120 @@ double meanHypothesisT2(const unsigned n1, const unsigned n2, const double xbar1
 {
     return ((xbar1 - xbar2) / sqrt(((sigma1 * sigma1) / n1) + ((sigma2 * sigma2) / n2)));
 }
+
+// If pValue < alpha is TRUE then the null hypothesis is rejected else it fails to reject.
 #define DecideHypothesis(pValue, alpha)  (pValue < alpha) ? std::cout << "reject H0\n" : std::cout << "don't reject H0\n"
+
+// Chi-square test statistic.
+double chisq(const double O, const double E) { return pow(O - E, 2.) / E; }
+
+template<typename T>
+T findChiSquare(const std::vector<T>& O, std::vector<T>& E)
+{
+    std::vector<T> csq;
+
+    for (unsigned i = 0; i < O.size(); i++)
+        csq.push_back(chisq(O[i], E[i]));
+    
+    return std::accumulate(csq.begin(), csq.end(), 0.);
+}
+
+
+// Average for the data set.
+template<typename T>
+T mean(const std::vector<T>& v)
+{
+    if (v.empty())
+        return { };
+
+    return std::accumulate(v.begin(), v.end(), 0.0) / v.size();
+}
+
+//  Middle value of the data set.
+template<typename T>
+T median(std::vector<T> v)
+{
+    if (v.empty())
+        return { };
+
+    size_t n = v.size() / 2;
+    nth_element(v.begin(), v.begin() + n, v.end());
+
+    return v[n];
+}
+
+// Number that occurs the most in data set.
+template<typename T>
+T mode(std::vector<T> v)
+{
+    if (v.empty())
+        return { };
+
+    std::sort(v.begin(), v.end());
+
+    // Finding max frequency.
+    unsigned max_count = 1, count = 1;
+    T r = *v.begin();
+
+    for (auto it = v.begin(); it != v.end(); ++it)
+    {
+        if (it != v.begin() && *it == *(it - 1))
+            count++;
+        else
+        {
+            if (count > max_count)
+            {
+                max_count = count;
+                r = *(it - 1);
+            }
+            count = 1;
+        }
+    }
+
+    // When the last element is most frequent.
+    if (count > max_count)
+    {
+        max_count = count;
+        r = v[v.size() - 1];
+    }
+
+    // index = max_count;
+    return r;
+}
+
+// Measure of how far a set of data are dispersed from their mean.
+template<typename T>
+T variance(const std::vector<T>& v)
+{
+    if (v.empty())
+        return { };
+
+    unsigned sz = v.size();
+    const T mean = std::accumulate(v.begin(), v.end(), 0.0) / sz;
+    auto variance_func = [&mean, &sz](T accumulator, const T& val) { return accumulator + ((val - mean) * (val - mean) / (sz - 1)); };
+
+    return std::accumulate(v.begin(), v.end(), 0.0, variance_func);
+}
+
+// Measure of dispersement (tells how much data is spread out).
+template<typename T>
+T standardDeviation(std::vector<T> v)
+{
+    if (v.empty())
+        return { };
+
+    return sqrt(variance(v));
+}
+
+// Measure of how many standard deviations above/below the population mean.
+template<typename T>
+T zScore(const T x, const std::vector<T> v)
+{
+    if (v.empty())
+        return { };
+
+    return ((x - mean(v)) / standardDeviation(v));
+}
 
 double fmax2(double x, double y)
 {
