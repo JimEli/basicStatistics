@@ -29,6 +29,7 @@ Note: work in progress. These functions are sourced from various locations aroun
  <li>1-sample tests (porportion and means)</li>
  <li>2-sample tests (proportion and means)</li>
  <li>Goodness of fit (chi-square)</li>
+ <li>Independence test (chi-square)</li>
 </ol>
 
 ### Confidence Intervals
