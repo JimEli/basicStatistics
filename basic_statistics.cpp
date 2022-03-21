@@ -550,8 +550,59 @@ int main()
             }
         }
     }
+        
+ 
+    std::cout << "Hypothesis Test for Linear Correlation (Bivariate Data)\n";
+    {
+        {
+            // Can you conclude there is a linear correlation between number of absences and the grade of a student? Use alpha=0.01 level of significance.
+            // Number of absencesand the grade of a sample of students: 
+            // absences = c(8, 2, 5, 12, 15, 9, 6)
+            // grades = c(82, 92, 90, 51, 43, 70, 82) 
+            // plot(absences, grades) 
+            // lm (y, x): lm(grades~absences)
+            // abline(b, m): abline(107.16, -4.213)
+            // cor.test(x, y): cor.test(absences, grades)
+            std::vector<double> absences = { 8, 2, 5, 12,15, 9, 6 };
+            std::vector<double> grades = { 82, 92, 90, 51, 43, 70, 82 };
+            std::pair<double, double> fit = lsq(absences, grades);
+            std::cout << " m: " << fit.first << ", b: " << fit.second << "\n";
+            double r = R(absences, grades);  print("correlation coefficeint r:", r);
+            print("coefficeint of determination r^2:", pow(r, 2.));
+            std::cout << " 92.4% of variation in grades (y) can be explained by variation in absences (x).\n";
+            // State null and alternative hypothesis: H0 = "rho = 0", H1 = "rho != 0".
+            // Find critical value, 2-tailed! =7.823
+            unsigned DoF = 5 /* n - 2 */; double t = r * sqrt(DoF) / sqrt(1. - pow(r, 2.)); print("t:", t);
+            // Find p-value. =0.001
+            double p = (1. - pt(7.8233, DoF)) * 2.; print("p:", p);
+            // Reject or accept H0? =reject H0
+            std::cout << " We ";  DecideHypothesis(p, 0.02);
+            // State conclusion in sentence.
+            std::cout << " At 0.01 level of significance, there is enough evidence to conclude a linear correlation.\n";
+        }
+        {
+            // Can you conclude there is a linear correlation between number foot length and vocabulary size? Use alpha=0.05 level of significance.
+            // Foot length and vocabulary size for sample of children:
+            std::vector<double> foot = { 2, 5, 9, 6, 8, 8 };
+            std::vector<double> vocab = { 0, 80, 124, 53, 103, 158 };
+            std::pair<double, double> fit = lsq(foot, vocab);
+            std::cout << " m: " << fit.first << ", b: " << fit.second << "\n";
+            double r = R(vocab, foot);  print("correlation coefficeint r:", r);
+            print("coefficeint of determination r^2:", pow(r, 2.));
+            std::cout << " 79.9% of variation in grades (y) can be explained by variation in absences (x).\n";
+            // State null and alternative hypothesis: H0 = "rho = 0", H1 = "rho != 0".
+            // Find critical value, 2-tailed! = 3.991
+            unsigned DoF = 4 /* n - 2 */; double t = r * sqrt(DoF) / sqrt(1. - pow(r, 2.)); print("t:", t);
+            // Find p-value. =0.016
+            double p = (1. - pt(3.99143, DoF)) * 2.; print("p:", p);
+            // Reject or accept H0? =reject H0
+            std::cout << " We ";  DecideHypothesis(p, 0.05);
+            // State conclusion in sentence.
+            std::cout << " At 0.05 level of significance, there is enough evidence to conclude a linear correlation.\n";
+        }
+    }
 
-
+        
     std::cout << "Poisson Distributions\n";
     {
         // Number of visits to a web page follows a Poisson distribution with mean 15 visits per hour.
