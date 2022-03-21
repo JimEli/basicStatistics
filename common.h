@@ -180,6 +180,56 @@ T zScore(const T x, const std::vector<T> v)
     return ((x - mean(v)) / standardDeviation(v));
 }
 
+// lsq data fit. Returns std::pair(m, b)
+std::pair<double, double> lsq(const std::vector<double>& x, const std::vector<double>& y)
+{
+    assert(x.size() == y.size());
+
+    double f = 0., g = 0., h = 0., j = 0.;
+    size_t pts = x.size();
+
+    for (size_t i = 0; i < pts; i++)
+    {
+        f = f + x[i] * x[i];
+        g = g + x[i];
+        h = h + x[i] * y[i];
+        j = j + y[i];
+    }
+
+    double m = (g * j - h * pts) / (g * g - f * pts);
+    double b = (g * h - f * j) / (g * g - f * pts);
+
+    return std::make_pair(m, b);
+}
+
+// Linear correlation coefficeint.
+double R(const std::vector<double>& x, const std::vector<double>& y)
+{
+    double	ymu = 0., dividend = 0., divisor = 0.;
+    size_t n = x.size();
+
+    // y mean.
+    for (size_t i = 0; i < n; i++)
+        ymu += y[i];
+    ymu /= n;
+
+    // slope & y-int.
+    std::pair<double, double> mb = lsq(x, y);
+
+    // variance y prime.
+    for (size_t i = 0; i < n; i++)
+        dividend = dividend + pow(((mb.first * x[i] + mb.second) - ymu), 2.);
+    dividend /= n;
+
+    // variance y.
+    for (size_t i = 0; i < n; i++)
+        divisor = divisor + pow((y[i] - ymu), 2.);
+    divisor /= n;
+
+    // correlation coefficient.
+    return sqrt(dividend / divisor);
+}
+
 double fmax2(double x, double y)
 {
 #ifdef IEEE_754
