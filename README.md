@@ -15,15 +15,6 @@ Note: work in progress. These functions are sourced from various locations aroun
   <li>z-score</li>
 </ol>
 
-### The following functions act basically like the identical versions found in R:
-<ol>
-  <li>pnorm, qnorm, dnorm</li>
-  <li>pbinom, qbinom, dbinom</li>
-  <li>pt, qt, dt</li>
-  <li>ppois, qpois, dpois</li>
-  <li>pchisq, qchisq, dchisq</li>
-</ol>
-
 ### Hypothesis testing
 <ol>
  <li>1-sample tests (porportion and means)</li>
@@ -34,4 +25,15 @@ Note: work in progress. These functions are sourced from various locations aroun
 
 ### Confidence Intervals
 
-Primarily follows this <a href="https://www.youtube.com/watch?v=pEmF0-S1I6s&list=PLzlz5Ed1uSVGSBi2biRNCCwvdadhn1CLD">series of online videos</a> from the Cosumnes River College, Stat 300 course.
+### The following functions act basically like the identical versions found in R:
+<ol>
+  <li>pnorm, qnorm, dnorm</li>
+  <li>pbinom, qbinom, dbinom</li>
+  <li>pt, qt, dt</li>
+  <li>ppois, qpois, dpois</li>
+  <li>pchisq, qchisq, dchisq</li>
+</ol>
+
+Everything needed for Statistics 101.
+
+Includes extensive usage demo commented with explanations which primarily follow this <a href="https://www.youtube.com/watch?v=pEmF0-S1I6s&list=PLzlz5Ed1uSVGSBi2biRNCCwvdadhn1CLD">series of online videos</a> from the Cosumnes River College, Stat 300 course.
