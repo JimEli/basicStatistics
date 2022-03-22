@@ -36,4 +36,4 @@ Note: work in progress. These functions are sourced from various locations aroun
 
 Everything needed for Statistics 101.
 
-Includes extensive usage demo commented with explanations which primarily follow this <a href="https://www.youtube.com/watch?v=pEmF0-S1I6s&list=PLzlz5Ed1uSVGSBi2biRNCCwvdadhn1CLD">series of online videos</a> from the Cosumnes River College, Stat 300 course.
+Includes extensive usage demo commented with explanations which primarily follow <a href="https://www.youtube.com/watch?v=pEmF0-S1I6s&list=PLzlz5Ed1uSVGSBi2biRNCCwvdadhn1CLD">this series of online videos</a> from the Cosumnes River College, Stat 300 course.
