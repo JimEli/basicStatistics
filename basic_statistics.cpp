@@ -5,9 +5,9 @@
 #include "common.h"
 #include "normal.h"
 #include "binomial.h"
-#include "poisson.h"
-#include "chisquare.h"
 #include "student.h"
+#include "chisquare.h"
+#include "poisson.h"
 
 // Sample usage.
 void print(const std::string s, const double x) { std::cout << " " << s << " " << x << std::endl; }
@@ -24,7 +24,7 @@ int main()
     std::cout << "z-score:" << std::endl; std::for_each(sample.begin(), sample.end(), [sample](double x) { std::cout << "  " << x << ": " << zScore(x, sample) << std::endl; });
 
 
-    // R Binomial Probabilities: P(X=k) = dbinom(#success, #trials, prob. success) and P(X<=k) = pbinom(#success, #trials, #prob. success)
+    // Binomial Probabilities: P(X=k) = dbinom(#success, #trials, prob. success) and P(X<=k) = pbinom(#success, #trials, #prob. success)
     std::cout << "Binomial Distribution Probabilities\n";
     {
         // A basketball player makes 44% of his/her 3-point shots. In a game he attempts 
@@ -66,7 +66,7 @@ int main()
         print("McDonald's winners:", pBinom(108, 530, 0.25));
     }
 
-    // R Normal Distribution Probabilities (percent, proportion): pnorm(z) x->z->area, qnorm(left area) area->z->x
+    // Normal Distribution Probabilities (percent, proportion): pnorm(z) x->z->area, qnorm(left area) area->z->x
     std::cout << "Normal Distribution Probabilities\n";
     {
         // Customers waiting time is normally distributed with mean of 2.58 minutes and standard deviation 
@@ -177,11 +177,6 @@ int main()
         // 8.3% of all Americans have diabetes. Suppose that a random sample of 91 Americans is taken. What is the probability that 
         // the proportion of people in the sample who are diabetic differs from the population proportion by more than 2%? = 0.4892
         print("Probability diabetics in sample of 91 differs from population by more than 2%:", 2 * pNormCDF(zPhat(91, 0.083, (0.083 - 0.02))));
-        {
-            // Mean cholesterol is 197mg/dL, with a standard deviation of 35 and levels are normally distributed. 
-            // What is probability that a randomly selected sample of 150 adults will have a mean of less than 183?
-            //double z = (183 - 197) / (35 / sqrt(150)), p = pNorm(183, 197, 35); std::cout << z << ", " << p << ", " << std::endl;
-        }
     }
 
     std::cout << "Confidence Intervals for 1-Sample Population Proportions\n";
