@@ -3,7 +3,7 @@
 
 The statistical functions herein are those covered in a basic course of statistics.
 
-Note: A work in progress. These functions are sourced from various locations around the web. Code is completely unpolished, with few comments or attributions (yet).
+Note: This is a work in progress. These functions are sourced from various locations around the web. Code is completely unpolished, with few comments or attributions (yet).
  
 ### Basic statistical functions performed on a vector of data:
 <ol>
@@ -34,6 +34,6 @@ Note: A work in progress. These functions are sourced from various locations aro
   <li>pchisq, qchisq, dchisq</li>
 </ol>
 
-Everything needed for Statistics 101.
+* Everything needed for Statistics 101.
 
-Includes extensive usage demo commented with explanations which primarily follow <a href="https://www.youtube.com/watch?v=pEmF0-S1I6s&list=PLzlz5Ed1uSVGSBi2biRNCCwvdadhn1CLD">this series of online videos</a> from the Cosumnes River College, Stat 300 course.
+* Includes extensive usage demo commented with explanations which primarily follow <a href="https://www.youtube.com/watch?v=pEmF0-S1I6s&list=PLzlz5Ed1uSVGSBi2biRNCCwvdadhn1CLD">this series of online videos</a> from the Cosumnes River College, Stat 300 course.
