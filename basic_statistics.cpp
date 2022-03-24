@@ -1,7 +1,10 @@
 #define _USE_MATH_DEFINES 
+#include <cmath>
 #include <iostream>
 #include <vector>
-
+#include <algorithm>
+#include <numeric>
+// Our stat package includes.
 #include "common.h"
 #include "normal.h"
 #include "binomial.h"
@@ -10,18 +13,19 @@
 #include "poisson.h"
 
 // Sample usage.
-void print(const std::string s, const double x) { std::cout << " " << s << " " << x << std::endl; }
+void print(const std::string& s, const double x) { std::cout << " " << s << " " << x << std::endl; }
+void printCI(const std::string ci, const double phat, const double E) { std::cout << " " << ci << "% CI: " << phat - E << " to " << phat + E << " [margin of error: +/-" << E << "]\n"; }
 
 int main()
 {
-    const std::vector<double> sample = { 3.0, 1.0, 5.0, 6.0, 3.0, 4.5 };
+    std::vector<double> sample = { 3.0, 1.0, 5.0, 6.0, 3.0, 4.5 };
 
     print("mean:", mean(sample));
     print("median:", median(sample));
     print("mode:", mode(sample));
     print("variance:", variance(sample));
     print("standard deviation:", standardDeviation(sample));
-    std::cout << "z-score:" << std::endl; std::for_each(sample.begin(), sample.end(), [sample](double x) { std::cout << "  " << x << ": " << zScore(x, sample) << std::endl; });
+    std::cout << "z-score:" << std::endl; std::for_each(sample.begin(), sample.end(), [&sample](double x) { std::cout << "  " << x << ": " << zScore(x, sample) << std::endl; });
 
 
     // Binomial Probabilities: P(X=k) = dbinom(#success, #trials, prob. success) and P(X<=k) = pbinom(#success, #trials, #prob. success)
@@ -184,29 +188,27 @@ int main()
         {
             // Poll of 238 voters finds 137 approve an amendment. Construct a 95% confidence 
             // interval for proportion of voters supporting amendment. =(0.513 to 0.638)
-            double phat = (137. / 238.), E = proportionMoE(238, Z95CI, phat);
-            std::cout << " 95% CI: " << phat - E << " to " << phat + E << " [margin of error: +/-" << E << "]" << std::endl;
+            printCI("95", (137. / 238.), proportionMoE(238, Z95CI, (137./238.)));
             // "We are 95% confident that the percentage of voters supporting the amendment is between 51.3% and 63.8% (57.6%).
         }
         {
             // Random sample of 250 college students determines their study hours have a sample mean of xbar=15.7 hours per week. 
             // If margin of error for the data using 95%CI is E=0.6 hours, construct a 95% confidence interval for the data. =(15.1 to 16.3)
-            double phat = 15.7, E = 0.6;
-            std::cout << " 95% CI: " << phat - E << " to " << phat + E << " [margin of error: +/-" << E << "]" << std::endl;
+            double phat = 15.7, E = 0.6; printCI("95", phat, E);
             // "We are 95% confident that the study hours are between 15.1 and 16.3 hrs (15.7)"
         }
         {
             // Survey to be conducteed of random sample asking whether they favor/oppose an amendment. How many should be polled 
             // to be sure that a 90% CI for the proportion who favor amendment will have a margin of error of 0.05.
             // A previous survey suggest the proportion in favor will be 84%. What sample size is needed? = 146
-            double phat = 0.84, E = 0.05; std::cout << " 90% CI sample size: " << round(proportionN(E, Z90CI, phat) + .5) << std::endl;
+            double phat = 0.84, E = 0.05; printCI("90", phat, round(proportionN(E, Z90CI, phat) + .5));
             // Estimate sample size needed if no estimate of p is available. = 271
-            phat = 0.5; std::cout << " 90% CI sample size (no prior estimate): " << round(proportionN(E, Z90CI, phat) + .5) << std::endl;
+            phat = 0.5; printCI("90", phat, round(proportionN(E, Z90CI, phat) + .5));
         }
         {
             // A newspaper wants to predict outcome of election by estimating proportion voters supporting particular 
             // candidate. What sample size is needed to yield an estimate within 3% with 97% CI? =1309
-            double phat = 0.5, E = 0.03; std::cout << " 97% CI sample size: " << round(proportionN(E, qNorm(.97 + (1 - .97) / 2), phat) + .5) << std::endl;
+            double phat = 0.5, E = 0.03; printCI("97", phat, round(proportionN(E, qNorm(.97 + (1 - .97) / 2), phat) + .5));
         }
     }
 
@@ -215,26 +217,30 @@ int main()
         {
             // Random survey sample of 43 renters found mean rent of $940 with 
             // standard deviation of $300. Construct a 91% CI for the mean rent. =(860.6 to 1019.4)
-            unsigned n = 43 - 1; double xbar = 940, t = qt(1 - ((1 - .91) / 2), n), E = meanMoE(n, t, 300);
-            std::cout << " 91% CI: " << xbar - E << " to " << xbar + E << " [margin of error: +/-" << E << "]" << std::endl;
+            unsigned n = 43 - 1; double xbar = 940, t = qt(1 - ((1 - .91) / 2), n), E = meanMoE(n, t, 300); printCI("91", xbar, E);
             // "We are 91% confident that the mean rent is between $860.6 and $1019.4 ($940)"
         }
         {
             // We want an estimate of proportion of students who log into Facebook daily. 
             // Out of random sample of 200 students, 134 report logging in daily.
             // Construct 86% CI for proportion that log in daily. =(62.1 to 71.9)
-            double phat = 134. / 200, E = proportionMoE(200, qNorm(.86 + (1 - .86) / 2), phat);
-            std::cout << " 86% CI: " << phat - E << " to " << phat + E << " [margin of error: +/-" << E << "]" << std::endl;
+            double phat = 134. / 200, E = proportionMoE(200, qNorm(.86 + (1 - .86) / 2), phat); printCI("86", phat, E);
             // "We are 86% confident that the mean log ins is between 62.1 and 71.9% (67%)"
         }
         {
             // to determine mean hours per week a person watches TV, how many people needed to estimate number hours within 2 hours 
             // with 94% CI? Results from previous survey indicate hours watched per week has a standard deviation of 7.5 hours. =50
-            double z = qNorm(.94 + (1 - .94) / 2); std::cout << " 94% CI sample size: " << round(meanN(2, z, 7.5) + .5) << std::endl;
+            double z = qNorm(.94 + (1 - .94) / 2); printCI("94", z, round(meanN(2, z, 7.5) + .5));
         }
     }
 
 
+    // Type I Error: When we reject H0, but in reality H0 is true. 
+    // * Probability of this error is alpha. 
+    // * Reduce probability of this error by lowering alpha.
+    // Type II Error: When we don't reject H0, but in reality H0 was false. 
+    // * Probability of this error is beta. 
+    // * Reduce probability of this error by increasing sample size.
     std::cout << "1-Sample Hypothesis Testing for Proportions\n";
     {
         {
@@ -257,11 +263,11 @@ int main()
             // newspaper daily. Can it be concluded that proportion of reders at Specific college differs from 15%? Use alpha=0.03 level of significance.
             // State null and alternative hypothesis: H0 = "Specific college newspaper readers equal 15% (p=0.15)", H1 = "Specfic college newspaper readers does not equal 15% (p!=0.15)".
             // Find critical value and rejection region. =+/-2.170, two-tailed (right & left)
-            std::cout << " critcal z value: " << qNorm(.03/2) << " and " << qNorm(1. - (.03/2)) << std::endl;
+            std::cout << " critcal z value: " << qNorm(.03 / 2) << " and " << qNorm(1. - (.03 / 2)) << std::endl;
             // Find z statistic. =-1.980
             unsigned n = 200; double phat = 40. / n, p0 = 0.15, z = proportionHypothesisZ(n, phat, p0); print("z:", z);
             // Find p-value. =0.048
-            double p = 2.*pNorm(-z); print("p-value:", p);
+            double p = 2. * pNorm(-z); print("p-value:", p);
             // Reject or accept H0? =[Results (40 in 200) occur only 4.8% of time (0.048<0.03, or -1.98<-2.17), so don't reject H0]
             std::cout << " We ";  DecideHypothesis(p, .03);
             // State conclusion in sentence.
@@ -292,11 +298,11 @@ int main()
             // Can you conclude that mean tuition for private colleges is differnet from $35,500. Use alpha=0.03 significance level.
             // State null and alternative hypothesis: H0 = "Private college mean tuition equals $35,500 (mu=35500)", H1 = "Private college mean tuition does not equal $35,500 (mu!=35500)".
             // Find critical value and rejection region. = +/-2.491, two-tailed (left & right)
-            unsigned n = 12, DoF = n - 1; std::cout << " critcal t value: " << qt(.03/2, DoF) << " and " << qt(1. - (.03 / 2), DoF) << std::endl;
+            unsigned n = 12, DoF = n - 1; std::cout << " critcal t value: " << qt(.03 / 2, DoF) << " and " << qt(1. - (.03 / 2), DoF) << std::endl;
             // Find t statistic. =-2.981
-            double xbar = 39200., mu =35500., sigma = 4300., t = meanHypothesisT(n, xbar, mu, sigma); print("t:", t);
+            double xbar = 39200., mu = 35500., sigma = 4300., t = meanHypothesisT(n, xbar, mu, sigma); print("t:", t);
             // Find p-value. =0.013
-            double p = 2.*pt(-t, DoF); print("p-value:", p);
+            double p = 2. * pt(-t, DoF); print("p-value:", p);
             // Reject or accept H0? =[Mean college tuituion equals 35500 at 0.6% of time (.013<.03, or -2.98<-2.491), so do not reject H0]
             std::cout << " We ";  DecideHypothesis(p, 0.03);
             // State conclusion in sentence.
@@ -377,10 +383,10 @@ int main()
             unsigned n1 = bt.size(), n2 = lt.size(), DoF = /*smaller sample*/n2 - 1; std::cout << " critcal t value: " << qt(.09 / 2, DoF) << " and " << qt(1. - (.09 / 2), DoF) << std::endl;
             // Find t statistic. =1.822
             double xbar1 = mean(bt), xbar2 = mean(lt), sigma1 = standardDeviation(bt), sigma2 = standardDeviation(lt);
-            double t = meanHypothesisT2(n1, n2, xbar1, xbar2, sigma1, sigma2); 
+            double t = meanHypothesisT2(n1, n2, xbar1, xbar2, sigma1, sigma2);
             print("t:", t);
             // Find p-value. =0.096
-            double p = 2. * pt(-t, DoF); 
+            double p = 2. * pt(-t, DoF);
             print("p-value:", p);
             // Reject or accept H0? =don't reject
             std::cout << " We ";  DecideHypothesis(p, 0.02);
@@ -428,7 +434,7 @@ int main()
             // 2. Margin of error =7.740
             double E = meanMoE2(n1, n2, sigma1, sigma2, t); print("margin of error:", E);
             // 3. MoE
-            std::cout << " 95% CI: " << xbar1 - xbar2 << " +/-" << E << ", [" << xbar1 - xbar2 - E << " to " << xbar1 - xbar2 + E << "]" << std::endl;
+            printCI("95", xbar1 - xbar2, E);
             // " We are 95% confident that the mean scores for the 2 types of instruction is between -10.99 and 4.49"
         }
         {
@@ -439,8 +445,7 @@ int main()
             // 1. critical area =+/-2.326
             double z = qNorm((1. - 0.98) / 2); std::cout << " z: " << z << " and " << -z << std::endl;
             // 2. Margin of error =0.173
-            double E = proportionMoE2(n1, n2, -z, phat1, phat2); print("margin of error:", E);
-            std::cout << " 98% CI: " << phat << " +/-" << E << ", [" << phat - E << " to " << phat + E << "]" << std::endl;
+            double E = proportionMoE2(n1, n2, -z, phat1, phat2); print("margin of error:", E); printCI("98", phat, E);
             // "We are 98% confident that the difference between proportion of pretzels purchased before and after ad campagain is between 15.1% and 49.7%"
         }
         {
@@ -454,8 +459,7 @@ int main()
             // 1. Find critical values. =+/-1.895
             double t = qt((1 - .90) / 2, DoF); std::cout << " t: " << t << " and " << qt(1 - ((1 - .90) / 2), n) << std::endl;
             // 2. Find margin of error. =8.967
-            double E = meanMoE(n, -t, sigma); print("margin of error:", E);
-            std::cout << " 90% CI: " << xbar << " +/-" << E << " [" << xbar - E << " to " << xbar + E << "]" << std::endl;
+            double E = meanMoE(n, -t, sigma); print("margin of error:", E); printCI("90%", xbar, E);
             // "We are 90% confident that the mean reduction in cholesterol is between 70.408 and 88.342."
         }
         {
@@ -468,7 +472,7 @@ int main()
             // 2. Margin of error =
             double E = meanMoE2(n1, n2, sigma1, sigma2, t); print("margin of error:", E);
             // 3. MoE
-            std::cout << " 99% CI: " << xbar1 - xbar2 << " +/-" << E << ", [" << xbar1 - xbar2 - E << " to " << xbar1 - xbar2 + E << "]" << std::endl;
+            printCI("99", xbar1 - xbar2, E);
             // " We are 99% confident that the difference between men and women mean energy drinks consumed is between 0.697 and 1.843"
         }
     }
@@ -545,10 +549,11 @@ int main()
             }
         }
     }
-        
- 
+
+
     std::cout << "Hypothesis Test for Linear Correlation (Bivariate Data)\n";
     {
+        // Correlation is not causation (lurking variable). 
         {
             // Can you conclude there is a linear correlation between number of absences and the grade of a student? Use alpha=0.01 level of significance.
             // Number of absencesand the grade of a sample of students: 
@@ -576,7 +581,7 @@ int main()
             std::cout << " At 0.01 level of significance, there is enough evidence to conclude a linear correlation.\n";
         }
         {
-            // Can you conclude there is a linear correlation between number foot length and vocabulary size? Use alpha=0.05 level of significance.
+            // Can you conclude there is a linear correlation between person's foot length and vocabulary size? Use alpha=0.05 level of significance.
             // Foot length and vocabulary size for sample of children:
             std::vector<double> foot = { 2, 5, 9, 6, 8, 8 };
             std::vector<double> vocab = { 0, 80, 124, 53, 103, 158 };
@@ -597,7 +602,8 @@ int main()
         }
     }
 
-        
+
+    // Poisson is a discrete distribution descibing a number of events in a fixed time interval/region of opportunity (0 to inf).
     std::cout << "Poisson Distributions\n";
     {
         // Number of visits to a web page follows a Poisson distribution with mean 15 visits per hour.
@@ -605,9 +611,9 @@ int main()
         print("10 or less web visits per hour:", pPois(10, 15));
         // Equivalent to...
         //{ 
-          //double p=0.; 
+          //double p = 0.; 
             //for (int i=0; i<=10; i++) 
-              //p+=dPois(i, 15); 
+              //p += dPois(i, 15); 
           //print("10 or less web hits per hour:", p); 
         //} 
 
